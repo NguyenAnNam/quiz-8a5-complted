@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUIZ 8A5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-10px, 0); }
+            40% { transform: translate(10px, 0); }
+            60% { transform: translate(-8px, 0); }
+            80% { transform: translate(8px, 0); }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 99999;
+            padding: 0;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body id="main-body" class="bg-slate-900 w-full h-screen overflow-hidden text-slate-800">
+
+    <div id="loading-screen">
+        <div class="absolute top-0 left-0 w-full flex justify-between items-center text-white text-base md:text-lg font-semibold tracking-wide px-8 py-4 bg-gradient-to-b from-black/80 to-transparent z-20">
+            <span>Loading...</span>
+            <span id="loading-status"></span>
+        </div>
+
+        <div class="absolute inset-0 w-full h-full z-0 overflow-hidden">
+            <img src="https://i.postimg.cc/wvLNZQvT/Builderletsky.png" alt="Forsaken Loading Art" class="w-full h-full object-cover filter brightness-90">
+            <div class="absolute inset-0 bg-black/30"></div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full px-8 pb-8 z-20 bg-gradient-to-t from-black/80 to-transparent pt-10">
+            <div class="w-full max-w-5xl mx-auto">
+                <div class="flex justify-between items-center mb-2 text-slate-200">
+                    <span class="text-sm italic drop-shadow-md"><i class="fa-solid fa-lightbulb text-yellow-400 mr-2"></i>README: Chủ Web Lười Tối Ưu Nên Phải Đợi Load!</span>
+                    <span id="loading-percent" class="text-2xl font-bold text-white drop-shadow-md">0%</span>
+                </div>
+                <div class="w-full bg-slate-800/80 backdrop-blur-md h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-700/60 shadow-xl">
+                    <div id="forsaken-bar" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-150" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="bg-music" loop></audio>
+    <audio id="quiz-music" loop></audio>
+
+    <div id="flash-overlay" class="fixed inset-0 pointer-events-none z-50 transition-opacity duration-300 opacity-0"></div>
+
+    <div id="start-menu" class="hidden relative w-full h-full flex flex-col items-center justify-center text-center p-4 overflow-hidden">
+        <img id="bg-img" 
+             src="https://i.postimg.cc/9QcVyJkN/Screenshot-2026-09-22-233236.png" 
+             alt="Ảnh lớp 8A5" 
+             class="absolute inset-0 w-full h-full object-cover z-0">
+
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10"></div>
+
+        <div class="relative z-20 space-y-4 sm:space-y-6 max-w-lg px-4 flex flex-col items-center">
+            <span class="inline-block px-5 py-2 bg-indigo-600/95 backdrop-blur-md text-white text-xs sm:text-sm font-bold rounded-full tracking-widest uppercase shadow-xl border border-indigo-300/40">
+               8A5 Mãi Đỉnh
+            </span>
+
+            <h1 class="text-5xl sm:text-7xl font-black text-white tracking-wider drop-shadow-[0_5px_20px_rgba(0,0,0,0.9)]">
+                QUIZ 8A5
+            </h1>
+
+          <p class="text-slate-100 text-sm sm:text-base font-semibold drop-shadow-md leading-relaxed">
+                Don't click this link: <a href="https://github.com/NguyenAnNam" target="_blank" class="underline hover:text-indigo-300">https://github.com/NguyenAnNam</a>
+            </p>
+
+            <button id="start-btn" onclick="startQuiz()" class="w-full py-4 px-8 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-extrabold text-lg sm:text-xl rounded-2xl shadow-2xl transition-all duration-200 flex items-center justify-center space-x-3 border border-indigo-300/50 cursor-pointer">
+                <span>BẮT ĐẦU </span>
+                <i class="fa-solid fa-play text-lg"></i>
+            </button>
+        </div>
+
+        <div class="absolute bottom-1 z-30 text-slate-300 text-xs sm:text-sm font-semibold tracking-wide drop-shadow-md">
+            ⚠️ IMPORTANT:Câu Hỏi Được Tạo Nên Bởi Nhiều Người && Thk Lm Web Có Sự Hỗ Trợ Từ AI ⚠️
+        </div>
+    </div>
+
+    <div id="secret-intro-box" class="hidden fixed inset-0 z-40 bg-purple-950/95 flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-slate-900 border-4 border-purple-500 rounded-3xl p-8 text-center shadow-[0_0_50px_rgba(168,85,247,0.5)]">
+            <div class="w-24 h-24 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl animate-bounce border-2 border-purple-400">
+                <i class="fa-solid fa-user-secret"></i>
+            </div>
+            <span class="px-4 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-full uppercase tracking-widest shadow-md">
+                Đặc Biệt
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-black text-white my-4 tracking-wider">
+                SECRET QUESTIONS
+            </h2>
+            <p class="text-purple-200 text-sm sm:text-base mb-8 leading-relaxed">
+                 Pls Don't Continue!
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="cancelSecretQuiz()" class="flex-1 py-3.5 bg-slate-700 hover:bg-slate-600 text-white font-bold text-base rounded-2xl shadow-lg transition active:scale-95 border border-slate-500 cursor-pointer flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>NO</span>
+                </button>
+                <button onclick="openPasswordPrompt()" class="flex-1 py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-base rounded-2xl shadow-xl transition active:scale-95 border border-purple-300/40 cursor-pointer flex items-center justify-center space-x-2">
+                    <span>Continue ( Not Recommended )</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="secret-password-box" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div id="password-card" class="w-full max-w-md bg-slate-900 border-2 border-purple-500 rounded-3xl p-8 text-center shadow-[0_0_40px_rgba(168,85,247,0.3)] transition-transform">
+            <div class="w-20 h-20 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl border border-purple-400/40">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-2xl font-black text-white mb-2 tracking-wider">NHẬP MẬT KHẨU </h3>
+            <p class="text-slate-400 text-xs sm:text-sm mb-6">  (<span class="text-purple-300 font-semibold">8a5</span>)</p>
+            
+            <div class="relative mb-6">
+                <input type="password" id="secret-password-input" placeholder="Nhập mật khẩu..." class="w-full px-5 py-3.5 bg-slate-800 border-2 border-slate-700 focus:border-purple-500 rounded-2xl text-white text-center font-bold text-lg outline-none transition" onkeydown="handlePasswordKeydown(event)">
+            </div>
+
+            <div id="password-error-msg" class="text-red-400 text-xs font-semibold mb-4 hidden">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> Mật khẩu sai !
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closePasswordPrompt()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition cursor-pointer border border-slate-700">
+                    Quay Lại
+                </button>
+                <button onclick="verifySecretPassword()" class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition cursor-pointer shadow-lg shadow-purple-600/30">
+                    Xác Nhận
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-alert-box" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-slate-900 border-2 border-red-500 rounded-3xl p-6 text-center shadow-2xl">
+            <h3 class="text-3xl font-black text-white mb-4 tracking-wider drop-shadow-md">Chịu r😢</h3>
+            <div class="w-full h-48 rounded-2xl overflow-hidden mb-6 bg-slate-800 flex items-center justify-center border border-slate-700">
+                <img src="https://media1.tenor.com/m/5I1HPj8ekXgAAAAC/243.gif" alt="GIF động" class="w-full h-full object-cover">
+            </div>
+            <button onclick="closeCustomAlert()" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-lg transition cursor-pointer">
+                Đóng & Tiếp Tục
+            </button>
+        </div>
+    </div>
+
+    <div id="correct-alert-box" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-slate-900 border-2 border-emerald-500 rounded-3xl p-6 text-center shadow-2xl">
+            <h3 class="text-3xl font-black text-emerald-400 mb-4 tracking-wider drop-shadow-md">👉👈</h3>
+            <div class="w-full h-48 rounded-2xl overflow-hidden mb-6 bg-slate-800 flex items-center justify-center border border-slate-700">
+                <img src="https://media.tenor.com/L9bil2cL2xIAAAAi/yellow-floating-sunglasses-cartoon.gif" alt="GIF đúng" class="w-full h-full object-cover">
+            </div>
+            <button onclick="closeCorrectAlert()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition cursor-pointer">
+                Đóng & Tiếp Tục
+            </button>
+        </div>
+    </div>
+
+    <div id="rickroll-modal" class="hidden fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+        <button onclick="closeRickrollModal()" class="absolute top-4 right-4 z-50 px-5 py-2.5 bg-red-600/90 hover:bg-red-500 text-white font-extrabold rounded-full shadow-2xl transition active:scale-95 flex items-center space-x-2 border-2 border-white/25 cursor-pointer backdrop-blur-md">
+            <span>Skip</span>
+            <i class="fa-solid fa-forward-step"></i>
+        </button>
+        <div class="w-full h-full relative bg-black flex items-center justify-center overflow-hidden">
+            <video id="local-video" class="w-full h-full object-cover" controls autoplay preload="auto" onended="closeRickrollModal()">
+                <source src="https://raw.githubusercontent.com/NguyenAnNam/quiz-8a5v3/refs/heads/main/YTSave_YouTube_Rick-Astley-Never-Gonna-Give-You-Up-Offi_Media_dQw4w9WgXcQ_004_360p%20(online-video-cutter.com).mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <div id="quiz-box" class="hidden fixed inset-0 z-30 bg-slate-100 flex flex-col justify-between p-2 sm:p-4">
+        <div class="w-full bg-white rounded-2xl p-4 sm:p-6 shadow-md text-center border-b-4 border-slate-200 flex items-center justify-between">
+            <span id="question-badge" class="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase">Câu hỏi</span>
+            <h2 id="question-text" class="text-xl sm:text-3xl font-black text-slate-800 tracking-wide flex-1 mx-2"></h2>
+            <span id="question-counter" class="text-xs font-bold text-slate-400">1/10</span>
+        </div>
+        <div class="flex-1 my-3 flex items-center justify-center gap-2 sm:gap-6 px-2 sm:px-8 overflow-hidden relative">
+            <div class="flex-1 h-full max-h-[45vh] bg-slate-200 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center border-2 border-slate-300 relative">
+                <img id="question-image" src="" alt="Ảnh câu hỏi" class="w-full h-full object-contain hidden transition-all duration-500">
+                <div id="image-overlay" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center text-white z-10 transition-all duration-300">
+                    <i class="fa-solid fa-eye-slash text-4xl mb-2 text-indigo-300 animate-pulse"></i>
+                    <span class="font-extrabold text-sm sm:text-base tracking-wide bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-600">
+                        Ảnh đã bị ẩn, chọn đáp án để xem!
+                    </span>
+                </div>
+                <div id="image-placeholder" class="text-slate-400 font-bold text-lg flex flex-col items-center">
+                    <i class="fa-solid fa-gamepad text-4xl mb-2 text-indigo-400"></i>
+                    <span>QUIZ 8A5</span>
+                </div>
+            </div>
+            <div class="absolute right-4 sm:right-12 z-20">
+                <button id="next-btn" onclick="nextQuestion()" class="hidden px-5 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-xl transition active:scale-95 flex items-center space-x-2 text-sm sm:text-base border-2 border-indigo-400 cursor-pointer">
+                    <span>TIẾP CÂU SAU</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        <div id="options-container" class="grid grid-cols-2 gap-2 sm:gap-4 h-36 sm:h-48"></div>
+    </div>
+
+    <div id="result-box" class="hidden fixed inset-0 z-30 bg-slate-900/95 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-2xl">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">❤</div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Hoàn Thành Bài Kiểm Tra!</h2>
+            <p id="score-text" class="text-slate-600 mb-6">Bạn trả lời đúng 0/0 câu</p>
+            <button onclick="restartQuiz()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>Làm Lại Bài Thi</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const DEFAULT_BG_MUSIC = "https://raw.githubusercontent.com/NguyenAnNam/quiz-8a5v3/refs/heads/main/Kahoot%20Lobby%20Music.mp3"; 
+        const QUIZ_PLAY_MUSIC = " https://raw.githubusercontent.com/NguyenAnNam/quiz-8a5v3/refs/heads/main/good_kahoot_music.mp3";
+
+        const soundPartyHorn = new Audio("https://raw.githubusercontent.com/NguyenAnNam/quiz-8a5v3/refs/heads/main/YTSave_YouTube_Confetti-with-Party-Horn-Sound-Green-Scr_Media_ZK9ygDosiVM_008_128k.mp3");
+        const soundWrong = new Audio("https://raw.githubusercontent.com/NguyenAnNam/quiz-8a5v3/refs/heads/main/duolingo-wrong.mp3");
+        const soundWrongQ2 = new Audio("https://raw.githubusercontent.com/NguyenAnNam/quiz-8a5v3/refs/heads/main/spongebob-fail.mp3");
+        const soundClick = new Audio("https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3");
+        
+        const bgMusic = document.getElementById("bg-music");
+        const quizMusic = document.getElementById("quiz-music");
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const loadingScreen = document.getElementById("loading-screen");
+            const bar = document.getElementById("forsaken-bar");
+            const percentText = document.getElementById("loading-percent");
+            const startMenu = document.getElementById("start-menu");
+            const mainBody = document.getElementById("main-body");
+
+            let currentPercent = 0;
+            const totalTime = 10000; 
+            const intervalTime = totalTime / 100;
+
+            const loadingInterval = setInterval(() => {
+                currentPercent++;
+                bar.style.width = currentPercent + "%";
+                percentText.innerText = currentPercent + "%";
+
+                if (currentPercent >= 100) {
+                    clearInterval(loadingInterval);
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        startMenu.classList.remove("hidden");
+                        mainBody.classList.remove("overflow-hidden");
+                    }, 500);
+                }
+            }, intervalTime);
+        });
+
+        function playSound(type) {
+            try {
+                if (type === 'click') { soundClick.currentTime = 0; soundClick.play().catch(e => {}); }
+                else if (type === 'correct') { soundPartyHorn.currentTime = 0; soundPartyHorn.play().catch(e => {}); }
+                else if (type === 'wrong') { soundWrong.currentTime = 0; soundWrong.play().catch(e => {}); }
+                else if (type === 'wrongQ2') { soundWrongQ2.currentTime = 0; soundWrongQ2.play().catch(e => {}); }
+            } catch (err) {}
+        }
+
+        window.addEventListener('click', () => {
+            if (bgMusic.paused && !document.getElementById("start-menu").classList.contains("hidden")) {
+                bgMusic.src = DEFAULT_BG_MUSIC;
+                bgMusic.volume = 0.4;
+                bgMusic.play().catch(e => {});
+            }
+        }, { once: true });
+
+        const optionStyles = [
+            { bg: "bg-red-500", label: "A" },
+            { bg: "bg-blue-600", label: "B" },
+            { bg: "bg-amber-500", label: "C" },
+            { bg: "bg-emerald-600", label: "D" }
+        ];
+
+        const questions = [
+            { 
+                question: "Sinh Nhật Cô Nga Vào Ngày Bao Nhiêu?", 
+                image: "https://i.postimg.cc/4dGw2qx0/Screenshot-2026-09-30-224235.png", 
+                options: ["08/11/1993", "09/11/1993", "09/11/1994", "08/11/1994"], 
+                correct: 0, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Cô Nga Có Dễ Thương Khum?", 
+                image: "https://i.postimg.cc/4dGw2qx0/Screenshot-2026-09-30-224235.png", 
+                options: ["Cóa", "Khum"], 
+                correct: 0, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Trùm FF 8A5 là ai?", 
+                image: "https://i.postimg.cc/sgSkkGNR/boi.jpg", 
+                options: ["Tuấn Minh", "Tùng Lâm", "ĐNT", "Cường"], 
+                correct: 1, 
+                isSecret: false, 
+                hideImage: true 
+            },
+            { 
+                question: "Ai Là Người Nghiện Forsaken Nhất 8A5?", 
+                image: "https://i.postimg.cc/tTzPw796/taodan.jpg", 
+                options: ["Không Biết", "CTTM", "Trần Đao"], 
+                correct: 2, 
+                isSecret: false, 
+                hideImage: true 
+            },
+            { 
+                question: "Phong Có ĐZ Không?", 
+                image: "https://i.postimg.cc/Zn201W5z/Screenshot-2026-09-25-000253.png", 
+                options: ["Không", "Có"], 
+                correct: [0, 1], 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Ai Là Goat?", 
+                image: "https://i.postimg.cc/kGYrWKdY/Screenshot-2026-09-30-225754.png", 
+                options: ["Tuân Minh", "Cày Gương", "Bổn Lào"], 
+                correct: 0, 
+                isSecret: false, 
+                hideImage: true 
+            },
+            { 
+                question: "Ai Xứng Đáng Bị Phù Phép Rrong 1 Đêm Ma Sói?", 
+                image: null, 
+                options: ["TLinh", "Trường Giang", "Dũng"], 
+                correct: 1, 
+                isSecret: false, 
+                hideImage: false
+            },
+              { 
+                question: "Ai Là Trùm Tí Hí Trong Ma Sói?", 
+                image: "https://i.postimg.cc/QNQhGMWS/nigga.png", 
+                options: ["TLinh", "KLinh", "HMinh", "Dũng"], 
+                correct: 3, 
+                isSecret: false, 
+                hideImage: true 
+            },
+            { 
+                question: "Ai Là Trùm Hóa?", 
+                image: "https://i.postimg.cc/gJ6c6qjk/dlam.png", 
+                options: ["Dí Lâm", "KLinh", "HMinh", "Dũng"], 
+                correct: 0, 
+                isSecret: false, 
+                hideImage: true
+            },
+            { 
+                question: "Cày Gương Được Gọi Là Gì?", 
+                image: "https://i.postimg.cc/DzGbDPjQ/toi.png", 
+                options: ["Chịu", "Tố Khổng Lời", "Cường"], 
+                correct: 1, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Nhà Ai Cạnh Hố Bom?", 
+                image: "https://i.postimg.cc/fTkypvky/Screenshot-2026-09-30-230513.png", 
+                options: ["HQ", "CDMX", "NULL"], 
+                correct: 0, 
+                isSecret: false, 
+                hideImage: true 
+            },
+            { 
+                question: "Khánh Linh Có Biệt Danh Là Gì?", 
+                image: "https://i.postimg.cc/15Km6zmP/klinh.png", 
+                options: ["linh", "linh dậu", "md", "chậu dị"], 
+                correct: 3, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Who Is That?", 
+                image: "https://i.postimg.cc/pdF3f0fm/chupa.png", 
+                options: ["TM", "KL", "CTTM","Dell Bt"], 
+                correct: 2, 
+                isSecret: false, 
+                hideImage: false 
+            },
+             { 
+                question: "Bao Nhiêu Đứa Bị Cô Xuân Cho 1 Địa?", 
+                image: null, 
+                options: ["3", "2", "4","5"], 
+                correct: 3, 
+                isSecret: false, 
+                hideImage: false 
+            },
+         
+            { 
+                question: "Ai Là Vua Sử?", 
+                image: null, 
+                options: ["Dừa Bell", "Hạnh", "Ngọc","Ngô Thanh Nghĩa"], 
+                correct: 0, 
+                isSecret: false, 
+                hideImage: false 
+            },
+
+          { 
+                question: "Câu Nói Cô Nga Nói Khi Lớp A5 Khảo Sát Anh Dưới Top Của A1", 
+                image: null, 
+                options: ["Đeo Mo Vào Mặt", "Trời Ơi", "Cái Gì Thế Này"], 
+                correct: 0, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Cô Xuân Địa Kì Vọng Ai Nhất A5", 
+                image: null, 
+                options: ["DNT", "Panh", "Ngô Thanh Nghĩa","Ngọc"], 
+                correct: 2, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Lớp Ổ Lợn Là?", 
+                image: null, 
+                options: [" Lớp 6 ", "Lớp 7", "Lớp 8"," Cả Ba Đáp Án Đều Đúng"], 
+                correct: 3, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Số Học Sinh Bị Ghi Lỗi Đá Bóng", 
+                image: null, 
+                options: ["36", "11", "18","10"], 
+                correct: 1, 
+                isSecret: false, 
+                hideImage: false 
+            },
+             { 
+                question: "Ai Là Người Đổ Nước Từ Tầng 3 Bị Phát Hiện?", 
+                image: null, 
+                options: [ "Báo", "Bổn","Hạnh","Tới"], 
+                correct: 2, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            
+            { 
+                question: "Đặc Điểm Của Linh Nhi Khi Trả Lời Cô Giáo?", 
+                image: "https://i.postimg.cc/sgBLzn08/mam.png", 
+                options: ["Giọng Ngọt", "Mâm", "Thái độ"], 
+                correct: 1, 
+                isSecret: false, 
+                hideImage: false 
+            },
+            { 
+                question: "Bạn Có Thể Quên 8A5 Không ?", 
+                image: "https://i.postimg.cc/9QcVyJkN/Screenshot-2026-09-22-233236.png", 
+                options: ["Tôi", "Cả Lớp", "Bạn", "Muốn Cũng Ko Được"], 
+                correct: 3, 
+                isSecret: false, 
+                hideImage: false
+            },
+            { 
+                question: "Hiển Hay Được Gọi Là Gì?", 
+                image: "https://i.postimg.cc/0NYc5k9t/hadnh.jpg", 
+                options: ["Hạnh", "Hồng", "Miều", "Vinh"], 
+                correct: 0, 
+                isSecret: true, 
+                hideImage: false 
+            },
+            { 
+                question: "Bắp Thị Caculate Là Ai?", 
+                image: null, 
+                options: ["Máy Xúc", "Ngô Thj T", "Ng Hữu Ch", "Skibidi"], 
+                correct: 1, 
+                isSecret: true, 
+                hideImage: false 
+            },
+            { 
+                question: "Mai Chi Với Tiến Minh Có Phải Là Couple Không?", 
+                image: "https://i.postimg.cc/CL6vcMM5/tm.jpg", 
+                options: ["Có", "Không"], 
+                percents: ["99%", "1%"], 
+                correct: [0, 1], 
+                isSecret: true, 
+                hideImage: false 
+            },
+            { 
+                question: "Khánh Nam Được Gọi Nhiều Nhất Là Gì?", 
+                image: "https://i.postimg.cc/dVQgz4gv/Screenshot-2026-09-24-235151.png", 
+                options: ["Chúc", "CDMX", "Tính"], 
+                percents: ["90%", "4%", "6%"], 
+                correct: [0, 1, 2], 
+                isSecret: true, 
+                hideImage: false 
+            },
+            { 
+                question: "What is the best couple?", 
+                image: "https://i.postimg.cc/bwhJrf3r/Screenshot-2026-09-30-230910.png", 
+                options: ["MC-TM", "KL-MD", "16/02-21/11", "Chanh"], 
+                correct: 2, 
+                isSecret: true, 
+                hideImage: true 
+            },
+            { 
+                question: "Trần Nhật Có GAY Không?", 
+                image: "https://i.postimg.cc/tTzPw796/taodan.jpg", 
+                options: ["Có", "Không"], 
+                percents: ["99.99999%", "0.00001%"], 
+                correct: 0, 
+                isSecret: true, 
+                hideImage: false 
+            },
+            { 
+                question: "Chủ Web Có Phải Là WIBU Ko?", 
+                image: "https://i.postimg.cc/527HjkGk/Screenshot-2026-09-30-225421.png", 
+                options: ["Cóa", "Khum"], 
+                correct: 0, 
+                isSecret: true, 
+                hideImage: false 
+            }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let hasShownSecretIntro = false;
+
+        function startQuiz() {
+            playSound('click');
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            if (QUIZ_PLAY_MUSIC) {
+                quizMusic.src = QUIZ_PLAY_MUSIC;
+                quizMusic.currentTime = 0;
+                quizMusic.volume = 0.4;
+                quizMusic.play().catch(e => {});
+            }
+            document.getElementById("start-menu").classList.add("hidden");
+            currentIndex = 0;
+            score = 0;
+            hasShownSecretIntro = false;
+            checkAndRunQuestion();
+        }
+
+        function checkAndRunQuestion() {
+            if (questions[currentIndex].isSecret && !hasShownSecretIntro) {
+                hasShownSecretIntro = true;
+                document.getElementById("quiz-box").classList.add("hidden");
+                document.getElementById("secret-intro-box").classList.remove("hidden");
+            } else {
+                document.getElementById("secret-intro-box").classList.add("hidden");
+                document.getElementById("quiz-box").classList.remove("hidden");
+                showQuestion();
+            }
+        }
+
+        function openPasswordPrompt() {
+            playSound('click');
+            document.getElementById("secret-intro-box").classList.add("hidden");
+            document.getElementById("secret-password-box").classList.remove("hidden");
+            const passInput = document.getElementById("secret-password-input");
+            passInput.value = "";
+            document.getElementById("password-error-msg").classList.add("hidden");
+            passInput.focus();
+        }
+
+        function closePasswordPrompt() {
+            playSound('click');
+            document.getElementById("secret-password-box").classList.add("hidden");
+            showResult();
+        }
+
+        function handlePasswordKeydown(event) {
+            if (event.key === "Enter") {
+                verifySecretPassword();
+            }
+        }
+
+        function verifySecretPassword() {
+            playSound('click');
+            const passInput = document.getElementById("secret-password-input");
+            const errorMsg = document.getElementById("password-error-msg");
+            const passwordCard = document.getElementById("password-card");
+            
+            const enteredVal = passInput.value.trim().toLowerCase();
+            const correctPasswords = ["haiyeungan"];
+
+            if (correctPasswords.includes(enteredVal)) {
+                errorMsg.classList.add("hidden");
+                document.getElementById("secret-password-box").classList.add("hidden");
+                document.getElementById("quiz-box").classList.remove("hidden");
+                showQuestion();
+            } else {
+                playSound('wrong');
+                errorMsg.classList.remove("hidden");
+                passwordCard.classList.add("animate-shake");
+                setTimeout(() => {
+                    passwordCard.classList.remove("animate-shake");
+                }, 400);
+                passInput.focus();
+                passInput.select();
+            }
+        }
+
+        function enterSecretQuiz() {
+            playSound('click');
+            openPasswordPrompt();
+        }
+
+        function cancelSecretQuiz() {
+            playSound('click');
+            document.getElementById("secret-intro-box").classList.add("hidden");
+            showResult();
+        }
+
+        function showQuestion() {
+            const currentQ = questions[currentIndex];
+            document.getElementById("question-text").innerText = currentQ.question;
+            document.getElementById("question-counter").innerText = `${currentIndex + 1}/${questions.length}`;
+            
+            const badgeEl = document.getElementById("question-badge");
+            if (currentQ.isSecret) {
+                badgeEl.innerText = "Secret Question";
+                badgeEl.className = "px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full uppercase animate-pulse";
+            } else {
+                badgeEl.innerText = "Câu hỏi";
+                badgeEl.className = "px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase";
+            }
+
+            document.getElementById("next-btn").classList.add("hidden");
+
+            const imgEl = document.getElementById("question-image");
+            const overlayEl = document.getElementById("image-overlay");
+            const placeholderEl = document.getElementById("image-placeholder");
+
+            if (currentQ.image) {
+                imgEl.src = currentQ.image;
+                imgEl.classList.remove("hidden");
+                placeholderEl.classList.add("hidden");
+                if (currentQ.hideImage) {
+                    imgEl.classList.add("blur-lg");
+                    overlayEl.classList.remove("hidden");
+                } else {
+                    imgEl.classList.remove("blur-lg");
+                    overlayEl.classList.add("hidden");
+                }
+            } else {
+                imgEl.classList.add("hidden");
+                overlayEl.classList.add("hidden");
+                placeholderEl.classList.remove("hidden");
+            }
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = "";
+
+            currentQ.options.forEach((opt, index) => {
+                const style = optionStyles[index % 4];
+                const btn = document.createElement("button");
+                btn.className = `w-full h-full p-3 sm:p-4 text-white font-bold text-base sm:text-xl rounded-xl sm:rounded-2xl shadow-lg ${style.bg} transition-all transform flex items-center justify-between border-b-4 border-black/20 cursor-pointer`;
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-3 sm:space-x-4 flex-1 text-left overflow-hidden">
+                        <span class="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg flex items-center justify-center font-black text-lg sm:text-2xl shrink-0">${style.label}</span>
+                        <span id="opt-text-${index}" class="break-words flex-1">${opt}</span>
+                    </div>
+                    <div class="icon-slot w-10 h-10 flex items-center justify-center shrink-0 text-2xl font-black ml-2"></div>
+                `;
+                btn.onclick = () => selectOption(index, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedIndex, selectedBtn) {
+            const currentQ = questions[currentIndex];
+
+            if (currentIndex === 1) {
+                quizMusic.pause();
+                if (selectedIndex === 1) {
+                    playSound('wrongQ2');
+                    document.getElementById("custom-alert-box").classList.remove("hidden");
+                    return;
+                } else if (selectedIndex === 0) {
+                    playSound('correct');
+                    score++;
+                    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+                    document.getElementById("correct-alert-box").classList.remove("hidden");
+                    return;
+                }
+            }
+
+            if (currentIndex === questions.length - 1) {
+                quizMusic.pause();
+                if (selectedIndex === 0) {
+                    const modal = document.getElementById("rickroll-modal");
+                    const vid = document.getElementById("local-video");
+
+                    modal.classList.remove("hidden");
+                    vid.currentTime = 0;
+                    
+                    vid.muted = false;
+                    vid.volume = 1.0;
+
+                    let playPromise = vid.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            vid.muted = true;
+                            vid.play().then(() => {
+                                vid.muted = false;
+                            });
+                        });
+                    }
+                    return;
+                } else {
+                    showResult();
+                    return;
+                }
+            }
+
+            quizMusic.pause();
+            const container = document.getElementById("options-container");
+            const allBtns = container.children;
+
+            const imgEl = document.getElementById("question-image");
+            const overlayEl = document.getElementById("image-overlay");
+            if (currentQ.image && currentQ.hideImage) {
+                imgEl.classList.remove("blur-lg");
+                overlayEl.classList.add("hidden");
+            }
+
+            if (currentQ.percents) {
+                currentQ.options.forEach((opt, index) => {
+                    const textSpan = document.getElementById(`opt-text-${index}`);
+                    if (textSpan && currentQ.percents[index]) {
+                        textSpan.innerText = `${opt} - ${currentQ.percents[index]}`;
+                    }
+                });
+            }
+
+            for (let btn of allBtns) {
+                btn.disabled = true;
+                btn.classList.add("opacity-40");
+            }
+
+            const correctIndices = Array.isArray(currentQ.correct) ? currentQ.correct : [currentQ.correct];
+            const isCorrect = correctIndices.includes(selectedIndex);
+            const selectedIcon = selectedBtn.querySelector('.icon-slot');
+            const flashOverlay = document.getElementById("flash-overlay");
+
+            if (isCorrect) {
+                playSound('correct');
+                selectedBtn.classList.remove("opacity-40", "bg-red-500", "bg-blue-600", "bg-amber-500", "bg-emerald-600");
+                selectedBtn.classList.add("bg-emerald-600", "ring-4", "ring-white", "scale-105");
+                selectedIcon.innerHTML = '<i class="fa-solid fa-check text-white"></i>';
+                score++;
+                confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+
+                flashOverlay.className = "fixed inset-0 pointer-events-none z-50 bg-emerald-500/30 transition-opacity duration-300 opacity-100";
+                setTimeout(() => { flashOverlay.classList.remove("opacity-100"); flashOverlay.classList.add("opacity-0"); }, 400);
+                document.getElementById("next-btn").classList.remove("hidden");
+            } else {
+                playSound('wrong');
+                selectedBtn.classList.remove("opacity-40", "bg-red-500", "bg-blue-600", "bg-amber-500", "bg-emerald-600");
+                selectedBtn.classList.add("bg-red-600", "scale-95");
+                selectedIcon.innerHTML = '<i class="fa-solid fa-xmark text-white"></i>';
+
+                correctIndices.forEach(cIndex => {
+                    if (allBtns[cIndex]) {
+                        allBtns[cIndex].classList.remove("opacity-40");
+                        allBtns[cIndex].classList.add("ring-4", "ring-white");
+                        const cIcon = allBtns[cIndex].querySelector('.icon-slot');
+                        if (cIcon) cIcon.innerHTML = '<i class="fa-solid fa-check text-white"></i>';
+                    }
+                });
+
+                flashOverlay.className = "fixed inset-0 pointer-events-none z-50 bg-red-500/30 transition-opacity duration-300 opacity-100 animate-shake";
+                setTimeout(() => { flashOverlay.classList.remove("opacity-100", "animate-shake"); flashOverlay.classList.add("opacity-0"); }, 400);
+                document.getElementById("next-btn").classList.remove("hidden");
+            }
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                if (QUIZ_PLAY_MUSIC) {
+                    quizMusic.currentTime = 0;
+                    quizMusic.play().catch(e => {});
+                }
+                checkAndRunQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function closeCustomAlert() {
+            playSound('click');
+            document.getElementById("custom-alert-box").classList.add("hidden");
+            currentIndex++;
+            checkAndRunQuestion();
+        }
+
+        function closeCorrectAlert() {
+            playSound('click');
+            document.getElementById("correct-alert-box").classList.add("hidden");
+            currentIndex++;
+            checkAndRunQuestion();
+        }
+
+        function closeRickrollModal() {
+            document.getElementById("rickroll-modal").classList.add("hidden");
+            const vid = document.getElementById("local-video");
+            vid.pause();
+            showResult();
+        }
+
+        function showResult() {
+            document.getElementById("quiz-box").classList.add("hidden");
+            document.getElementById("result-box").classList.remove("hidden");
+            document.getElementById("score-text").innerText = `Bạn trả lời đúng ${score}/${questions.length} câu`;
+        }
+
+        function restartQuiz() {
+            playSound('click');
+            document.getElementById("result-box").classList.add("hidden");
+            startQuiz();
+        }
+    </script>
+</body>
+</html>
