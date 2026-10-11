@@ -611,8 +611,10 @@
             const errorMsg = document.getElementById("password-error-msg");
             const passwordCard = document.getElementById("password-card");
             
-            const enteredVal = passInput.value.trim().toLowerCase();
-            const correctPasswords = ["NganIsMine"];
+            const enteredVal = passInput.value.trim(); // Có phân biệt hoa thường tùy ý, hoặc dùng .toLowerCase()
+            
+            // 👉 ĐỔI MẬT KHẨU MỚI TẠI ĐÂY (Bạn có thể thêm nhiều mật khẩu vào mảng này)
+            const correctPasswords = ["Ngan Is Mine"];
 
             if (correctPasswords.includes(enteredVal)) {
                 errorMsg.classList.add("hidden");
